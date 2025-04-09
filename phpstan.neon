@@ -1,21 +1,28 @@
 includes:
-  - ./vendor/nunomaduro/larastan/extension.neon
+  - ./vendor/larastan/larastan/extension.neon
 parameters:
   paths:
     - src
     - tests
   excludePaths:
     - src/Factory.php
-  level: max
+    - src/EloquentSpatialServiceProvider.php
+    - tests/DoctrineTypesTest.php
   ignoreErrors:
     -
-      message: '#^Call to an undefined method Pest\\Expectation\|Pest\\Support\\Extendable\:\:.+\(\)\.$#'
+      message: '#Call to an undefined method Illuminate\\Database\\Schema\\Blueprint\:\:.+\(\)#'
+      path: 'tests/database/migrations-laravel-<=10/*.php'
+    -
+      message: '#Undefined variable: \$this#'
+      path: tests/Expectations.php
+    -
+      message: '#Call to an undefined method Pest\\Expectation\<.+\>\:\:toBe(InstanceOf)?On(Postgres|Mysql)\(\)#'
       path: tests/*.php
     -
-      message: '#^Access to an undefined property Pest\\Expectation\|Pest\\Support\\Extendable\:\:\$.+\.$#'
-      path: tests/*.php
+      identifier: missingType.generics
     -
-      message: '#^Call to an undefined method Pest\\Expectation\:\:.+\(\)\.$#'
-      path: tests/*.php
-  checkMissingIterableValueType: true
-  checkGenericClassInNonGenericObjectType: false
+      identifier: method.nonObject
+    -
+      identifier: varTag.nativeType
+
+  level: max

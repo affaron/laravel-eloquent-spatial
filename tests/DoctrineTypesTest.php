@@ -1,7 +1,11 @@
 <?php
 
+use Doctrine\DBAL\Types\Type;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
+use MatanYadaev\EloquentSpatial\Doctrine\GeographyType;
 use MatanYadaev\EloquentSpatial\Doctrine\GeometryCollectionType;
+use MatanYadaev\EloquentSpatial\Doctrine\GeometryType;
 use MatanYadaev\EloquentSpatial\Doctrine\LineStringType;
 use MatanYadaev\EloquentSpatial\Doctrine\MultiLineStringType;
 use MatanYadaev\EloquentSpatial\Doctrine\MultiPointType;
@@ -9,36 +13,54 @@ use MatanYadaev\EloquentSpatial\Doctrine\MultiPolygonType;
 use MatanYadaev\EloquentSpatial\Doctrine\PointType;
 use MatanYadaev\EloquentSpatial\Doctrine\PolygonType;
 
-it('uses custom Doctrine types for spatial columns', function (): void {
-  $doctrineSchemaManager = DB::connection()->getDoctrineSchemaManager();
+/** @var array{column: string, postgresType: class-string<Type>, mySqlType: class-string<Type>} $typeClass */
+$dataset = [
+    [
+        'column' => 'point',
+        'postgresType' => GeometryType::class,
+        'mySqlType' => PointType::class,
+    ],
+    [
+        'column' => 'point_geography',
+        'postgresType' => GeographyType::class,
+        'mySqlType' => PointType::class,
+    ],
+    [
+        'column' => 'line_string',
+        'postgresType' => GeometryType::class,
+        'mySqlType' => LineStringType::class,
+    ],
+    [
+        'column' => 'multi_point',
+        'postgresType' => GeometryType::class,
+        'mySqlType' => MultiPointType::class,
+    ],
+    [
+        'column' => 'polygon',
+        'postgresType' => GeometryType::class,
+        'mySqlType' => PolygonType::class,
+    ],
+    [
+        'column' => 'multi_line_string',
+        'postgresType' => GeometryType::class,
+        'mySqlType' => MultiLineStringType::class,
+    ],
+    [
+        'column' => 'multi_polygon',
+        'postgresType' => GeometryType::class,
+        'mySqlType' => MultiPolygonType::class,
+    ],
+    [
+        'column' => 'geometry_collection',
+        'postgresType' => GeometryType::class,
+        'mySqlType' => GeometryCollectionType::class,
+    ],
+];
 
-  $columns = $doctrineSchemaManager->listTableColumns('test_places');
+it('uses custom Doctrine types for spatial columns', function ($column, $postgresType, $mySqlType): void {
+    $doctrineSchemaManager = DB::connection()->getDoctrineSchemaManager();
 
-  expect($columns['point']->getType())
-    ->toBeInstanceOf(PointType::class)
-    ->getName()->toBe('point');
+    $columns = $doctrineSchemaManager->listTableColumns('test_places');
 
-  expect($columns['line_string']->getType())
-    ->toBeInstanceOf(LineStringType::class)
-    ->getName()->toBe('linestring');
-
-  expect($columns['multi_point']->getType())
-    ->toBeInstanceOf(MultiPointType::class)
-    ->getName()->toBe('multipoint');
-
-  expect($columns['polygon']->getType())
-    ->toBeInstanceOf(PolygonType::class)
-    ->getName()->toBe('polygon');
-
-  expect($columns['multi_line_string']->getType())
-    ->toBeInstanceOf(MultiLineStringType::class)
-    ->getName()->toBe('multilinestring');
-
-  expect($columns['multi_polygon']->getType())
-    ->toBeInstanceOf(MultiPolygonType::class)
-    ->getName()->toBe('multipolygon');
-
-  expect($columns['geometry_collection']->getType())
-    ->toBeInstanceOf(GeometryCollectionType::class)
-    ->getName()->toBe('geometrycollection');
-});
+    expect($columns[$column]->getType())->toBeInstanceOfOnPostgres($postgresType)->toBeInstanceOfOnMysql($mySqlType);
+})->with($dataset)->skip(version_compare(Application::VERSION, '11.0.0', '>='));
