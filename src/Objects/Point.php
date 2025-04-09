@@ -9,37 +9,46 @@ use MatanYadaev\EloquentSpatial\Helper;
 
 class Point extends Geometry
 {
-    public float $latitude;
 
-    public float $longitude;
+  public float $latitude;
 
-    public function __construct(float $latitude, float $longitude, int|Srid|null $srid = null)
-    {
-        $this->latitude = $latitude;
-        $this->longitude = $longitude;
-        $this->srid = Helper::getSrid($srid);
-    }
+  public float $longitude;
 
-    public function toWkt(): string
-    {
-        $wktData = $this->getWktData();
+  public function __construct(float $latitude, float $longitude, int|Srid|null $srid = null)
+  {
+      $this->latitude = $latitude;
+      $this->longitude = $longitude;
+      $this->srid = Helper::getSrid($srid);
+  }
 
-        return "POINT({$wktData})";
-    }
+  public function toWkt(): string
+  {
+      $wktData = $this->getWktData();
 
-    public function getWktData(): string
-    {
-        return "{$this->longitude} {$this->latitude}";
-    }
+      return "POINT({$wktData})";
+  }
 
-    /**
-     * @return array{0: float, 1: float}
-     */
-    public function getCoordinates(): array
-    {
-        return [
-            $this->longitude,
-            $this->latitude,
-        ];
-    }
+  public function getWktData(): string
+  {
+      return "{$this->longitude} {$this->latitude}";
+  }
+
+  /**
+   * @return array{0: float, 1: float}
+   */
+  public function getCoordinates(): array
+  {
+      return [
+          $this->longitude,
+          $this->latitude,
+      ];
+  }
+  
+  public function toArray(): array
+  {
+      return [
+          'latitude' => $this->latitude,
+          'longitude' => $this->longitude,
+      ];
+  }
 }
